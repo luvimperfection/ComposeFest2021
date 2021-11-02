@@ -4,6 +4,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -141,6 +143,20 @@ fun Greetings(names: List<String> = listOf("hello", "compose")) {
     }
 }
 
+/**
+ * LazyColumn renders only the visible items on screen, allowing performance gains when rendering a big list.
+ * LazyColumn and LazyRow are equivalent to RecyclerView in Android Views.
+ * -> BUT! LazyColumn doesn't recycle its children like RecyclerView. It emits new Composables as you scroll through it and is still performant, as emitting Composables is relatively cheap compared to instantiating Android Views.
+ * */
+@Composable
+fun GreetingsWithLargeList(names: List<String> = List(1000){"$it"}) {
+    LazyColumn(modifier = Modifier.padding(vertical = 4.dp)){
+        items(items = names){ name ->
+            GreetingWithState(name=name)
+        }
+    }
+}
+
 
 @Composable
 private fun MyApp(){
@@ -176,7 +192,7 @@ private fun MyAppWithOnboarding(){
     if(shouldShowOnboarding) GreetingWithOnboardingScreen(
         onContinueClicked = {shouldShowOnboarding = false}
     )
-    else Greetings()
+    else GreetingsWithLargeList()
 }
 
 @Preview(showBackground = true)
