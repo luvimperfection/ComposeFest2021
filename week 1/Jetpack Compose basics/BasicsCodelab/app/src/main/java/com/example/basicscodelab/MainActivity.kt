@@ -3,18 +3,12 @@ package com.example.basicscodelab
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedButton
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role.Companion.Button
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.basicscodelab.ui.theme.BasicsCodelabTheme
@@ -23,7 +17,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            DefaultPreview6()
+            DefaultPreview7()
         }
     }
 }
@@ -117,6 +111,37 @@ fun GreetingWithState(name: String) {
     }
 }
 
+// with onboarding screen
+@Composable
+fun GreetingWithOnboardingScreen(onContinueClicked: () -> Unit) {
+    // `by` - no need to call .value
+    var shouldShowOnboarding by remember { mutableStateOf(true) }
+
+    Surface{
+        Column(modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ){
+            Text(text = "welcome to the basics codelab")
+            Button(modifier = Modifier.padding(vertical = 24.dp) ,
+                onClick = onContinueClicked
+            ) {
+                Text("Continue")
+            }
+        }
+    }
+}
+
+@Composable
+fun Greetings(names: List<String> = listOf("hello", "compose")) {
+    Column(modifier = Modifier.padding(vertical = 4.dp)){
+        for(name in names){
+            GreetingWithState(name=name)
+        }
+    }
+}
+
+
 @Composable
 private fun MyApp(){
     Surface(color = MaterialTheme.colors.background){
@@ -140,6 +165,18 @@ private fun MyAppListWithPadding(names: List<String> = listOf("Jetpack", "Compos
             GreetingWithPadding(name = it)
         }
     }
+}
+
+@Composable
+private fun MyAppWithOnboarding(){
+    var shouldShowOnboarding by remember{
+        mutableStateOf(true)
+    }
+
+    if(shouldShowOnboarding) GreetingWithOnboardingScreen(
+        onContinueClicked = {shouldShowOnboarding = false}
+    )
+    else Greetings()
 }
 
 @Preview(showBackground = true)
@@ -193,11 +230,20 @@ fun DefaultPreview5() {
     }
 }
 
-// set background width
+// with expand button
 @Preview(showBackground = true, widthDp = 320)
 @Composable
 fun DefaultPreview6() {
     BasicsCodelabTheme {
         GreetingWithState("Jin")
+    }
+}
+
+// with expand button
+@Preview(showBackground = true, widthDp = 320, heightDp = 320)
+@Composable
+fun DefaultPreview7() {
+    BasicsCodelabTheme {
+        MyAppWithOnboarding()
     }
 }
