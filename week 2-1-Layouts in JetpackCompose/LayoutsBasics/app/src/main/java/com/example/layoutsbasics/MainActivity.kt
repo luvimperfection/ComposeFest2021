@@ -18,8 +18,13 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.AlignmentLine
+import androidx.compose.ui.layout.FirstBaseline
+import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberImagePainter
 import com.example.layoutsbasics.ui.theme.LayoutsBasicsTheme
@@ -61,9 +66,12 @@ fun LayoutsCodelab() {
 
 @Composable
 fun BodyContent(modifier: Modifier = Modifier) {
-    Column(modifier = modifier) {
-        Text(text = "Hi there")
-        Text(text = "Thanks for going through the Layouts codelab")
+//    Column(modifier = modifier) {
+    MyOwnColumn(modifier = modifier) {
+        Text(text = "MyOwnColumn")
+        Text(text = "places item")
+        Text(text = "vertically")
+        Text(text = "We've done it by hand")
     }
 }
 
@@ -143,12 +151,81 @@ fun PhotographerCard(modifier: Modifier = Modifier){
     }
 }
 
-@Preview
+
+fun Modifier.firstBaselineToTop(
+    firstBaselineToTop: Dp
+) = this.then(
+    // measurable: child to be measured and placed
+    // constraints: minimum and maximum for the width and height of the child
+    layout { measurable, constraints ->
+        val placeable = measurable.measure(constraints)
+
+        // Check the composable has a first baseline
+        check(placeable[FirstBaseline] != AlignmentLine.Unspecified)
+        val firstBaseline = placeable[FirstBaseline]
+
+        // Height of the composable with padding - first baseline
+        val placebleY = firstBaselineToTop.roundToPx() - firstBaseline
+        val height = placeable.height + placebleY
+        layout(placeable.width, height) {
+            // place the composable
+            placeable.placeRelative(0, placebleY)
+        }
+    }
+)
+
+@Composable
+fun MyOwnColumn(
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit
+){
+    Layout(
+        modifier = modifier,
+        content = content
+    ){ measureables, constraints ->
+        // list of measured children
+        val placeables = measureables.map{ measurable ->
+            // measure each child
+            measurable.measure(constraints)
+        }
+        var yPosition = 0
+        layout(constraints.maxWidth, constraints.maxHeight){
+            // place children in the parent layout
+            placeables.forEach{ placeable ->
+                // position the item on the screen
+                placeable.placeRelative(x=0, y=yPosition)
+                // record the y coard placed up to
+                yPosition += placeable.height
+            }
+        }
+    }
+}
+
+//@Preview
+@Composable
+fun TextWithPaddingToBaselinePreview(){
+    LayoutsBasicsTheme {
+        Text("Hi there!",
+        Modifier.firstBaselineToTop(32.dp))
+    }
+}
+
+//@Preview
+@Composable
+fun TextWithNormalPaddingePreview(){
+    LayoutsBasicsTheme {
+        Text("Hi there!",
+            Modifier.padding(top = 32.dp))
+    }
+}
+
+@Preview(showBackground = true)
 @Composable
 fun LayoutPracticePreview() {
     LayoutsBasicsTheme {
-        SimpleList()
+//        SimpleList()
 //        LayoutsCodelab()
+        BodyContent()
     }
 }
 
