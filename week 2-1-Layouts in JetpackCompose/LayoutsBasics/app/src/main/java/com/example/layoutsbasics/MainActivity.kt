@@ -24,6 +24,9 @@ import androidx.compose.ui.layout.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.*
+import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.ConstraintSet
+import androidx.constraintlayout.compose.Dimension
 import coil.compose.rememberImagePainter
 import com.example.layoutsbasics.ui.theme.LayoutsBasicsTheme
 import com.example.layoutsbasics.ui.theme.LayoutsCodelabTheme
@@ -35,8 +38,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
 //            PhotographerCardPreview()
-//            LayoutPracticePreview()
-            ChipPreview()
+            LayoutPracticePreview()
+//            ChipPreview()
         }
     }
 }
@@ -333,8 +336,99 @@ private class PaddingModifier(
             else placeable.place(start.roundToPx(), top.roundToPx())
         }
     }
-
 }
+
+@Composable
+fun ConstraintLayoutContent() {
+    ConstraintLayout {
+
+        // Create references for the composables to constrain
+        val (button1, text, button2) = createRefs()
+
+        Button(
+            onClick = { /* Do something */ },
+            // Assign reference "button" to the Button composable
+            // and constrain it to the top of the ConstraintLayout
+            modifier = Modifier.constrainAs(button1) {
+                top.linkTo(parent.top, margin = 16.dp)
+            }
+        ) {
+            Text("Button 1")
+        }
+
+        // Assign reference "text" to the Text composable
+        // and constrain it to the bottom of the Button composable
+        Text("Text", Modifier.constrainAs(text) {
+            top.linkTo(button1.bottom, margin = 16.dp)
+            centerAround(button1.end)
+        })
+
+        val barrier = createEndBarrier(button1, text)
+        Button(
+            onClick = { /* Do something */ },
+            modifier = Modifier.constrainAs(button2) {
+                top.linkTo(parent.top, margin = 16.dp)
+                start.linkTo(barrier)
+            }
+        ) {
+            Text("Button 2")
+        }
+    }
+}
+
+@Composable
+fun LargeConstraintLayout() {
+    ConstraintLayout {
+        val text = createRef()
+
+        val guideline = createGuidelineFromStart(fraction = 0.5f)
+        Text(
+            "This is a very very very very very very very long text",
+            Modifier.constrainAs(text) {
+                linkTo(start = guideline, end = parent.end)
+                width = Dimension.preferredWrapContent
+            }
+        )
+    }
+}
+
+@Composable
+fun DecoupledConstraintLayout() {
+    BoxWithConstraints {
+        val constraints = if (maxWidth < maxHeight) {
+            decoupledConstraints(margin = 16.dp) // Portrait constraints
+        } else {
+            decoupledConstraints(margin = 32.dp) // Landscape constraints
+        }
+
+        ConstraintLayout(constraints) {
+            Button(
+                onClick = { /* Do something */ },
+                modifier = Modifier.layoutId("button")
+            ) {
+                Text("Button")
+            }
+
+            Text("Text", Modifier.layoutId("text"))
+        }
+    }
+}
+
+private fun decoupledConstraints(margin: Dp): ConstraintSet {
+    return ConstraintSet {
+        val button = createRefFor("button")
+        val text = createRefFor("text")
+
+        constrain(button) {
+            top.linkTo(parent.top, margin= margin)
+        }
+        constrain(text) {
+            top.linkTo(button.bottom, margin)
+        }
+    }
+}
+
+
 
 @Preview
 @Composable
@@ -369,7 +463,10 @@ fun LayoutPracticePreview() {
     LayoutsBasicsTheme {
 //        SimpleList()
 //        LayoutsCodelab()
-        BodyContent()
+//        BodyContent()
+//        ConstraintLayoutContent()
+//        LargeConstraintLayout()
+        DecoupledConstraintLayout()
     }
 }
 
