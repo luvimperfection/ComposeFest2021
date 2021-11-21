@@ -46,8 +46,12 @@ class TodoActivity : AppCompatActivity() {
 //        val items : List<TodoItem> by todoViewModel.todoItems.observeAsState(listOf())
         TodoScreen(
             items = todoViewModel.todoItems, //items,
+            currentlyEditing = todoViewModel.currentEditItem,
             onAddItem = todoViewModel::addItem, //{ todoViewModel.addItem(it) }, // in the next steps we'll complete this
-            onRemoveItem = todoViewModel::removeItem //{ todoViewModel.removeItem(it) } // in the next steps we'll complete this
+            onRemoveItem = todoViewModel::removeItem, //{ todoViewModel.removeItem(it) } // in the next steps we'll complete this
+            onStartEdit = todoViewModel::onEditItemSelected,
+            onEditItemChange = todoViewModel::onEditItemChange,
+            onEditDone = todoViewModel::onEditDone
         )
     }
 }
